@@ -7,7 +7,7 @@ return [
     | ever served through an authorised controller, never by a public URL.
     */
     'cv' => [
-        'disk' => 'cvs',
+        'disk' => env('CV_DISK', 'cvs'), // 'cvs' (filesystem disk) or 'database'
         'max_kb' => 5120,
         'max_per_candidate' => 5,
         'extensions' => ['pdf', 'doc', 'docx'],

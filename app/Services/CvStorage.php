@@ -43,8 +43,7 @@ class CvStorage
         }
 
         $extension = strtolower($file->guessExtension() ?: $file->getClientOriginalExtension() ?: 'pdf');
-        $path = $this->disk()->putFileAs('u'.$user->id, $file, Str::uuid().'.'.$extension);
-
+        $path = $file->storeAs('u'.$user->id, Str::uuid().'.'.$extension, config('talenthub.cv.disk'));
         $displayName = preg_replace('/[^\w.\- ]+/u', '_', basename($file->getClientOriginalName()));
 
         return $user->cvs()->create([
@@ -70,9 +69,7 @@ class CvStorage
             $wasPrimary = $cv->is_primary;
             $userId = $cv->user_id;
 
-            if ($this->disk()->exists($cv->path)) {
-                $this->disk()->delete($cv->path);
-            }
+            $this->disk()->delete($cv->path);
             $cv->delete();
 
             if ($wasPrimary) {
@@ -81,10 +78,58 @@ class CvStorage
         });
     }
 
-    public function download(Cv $cv): StreamedResponse
+       public function download(Cv $cv): StreamedResponse
     {
+        if ($this->usesDatabase()) {
+            $data = DB::table('cv_files')->where('path', $cv->path)->value('data');
+            abort_if($data === null, 404, 'This file is no longer available.');
+
+            $bytes = base64_decode($data, true) ?: '';
+
+            return response()->streamDownload(function () use ($bytes) {
+                echo $bytes;
+            }, $cv->original_name, ['Content-Type' => $cv->mime ?: 'application/octet-stream']);
+        }
+
         abort_unless($this->disk()->exists($cv->path), 404, 'This file is no longer available.');
 
         return $this->disk()->download($cv->path, $cv->original_name);
+    }
+
+    /** CV_DISK=database keeps file contents in the cv_files table instead of a filesystem disk. */
+    private function usesDatabase(): bool
+    {
+        return config('talenthub.cv.disk') === 'database';
+    }
+
+    /** Save the uploaded file and return its path. */
+    private function put(string $directory, UploadedFile $file, string $name): string
+    {
+        if ($this->usesDatabase()) {
+            $path = $directory.'/'.$name;
+            DB::table('cv_files')->insert([
+                'path' => $path,
+                'data' => base64_encode((string) file_get_contents($file->getRealPath())),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            return $path;
+        }
+
+        return $this->disk()->putFileAs($directory, $file, $name);
+    }
+
+    private function remove(string $path): void
+    {
+        if ($this->usesDatabase()) {
+            DB::table('cv_files')->where('path', $path)->delete();
+
+            return;
+        }
+
+        if ($this->disk()->exists($path)) {
+            $this->disk()->delete($path);
+        }
     }
 }
