@@ -52,6 +52,7 @@
             </button>
         </form>
 
+        
         <p class="mt-5 flex flex-wrap justify-center gap-x-5 gap-y-1 text-sm text-ink-600">
             <span><strong class="text-ink-900">{{ number_format($stats['jobs']) }}</strong> open jobs</span>
             <span><strong class="text-ink-900">{{ number_format($stats['employers']) }}</strong> employers</span>
