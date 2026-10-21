@@ -27,15 +27,14 @@
     <header class="sticky top-0 z-30 border-b border-ink-800 bg-ink-900 pt-safe text-white">
         <div class="mx-auto flex h-14 max-w-6xl items-center gap-3 px-4">
             <a href="{{ auth()->check() ? route('dashboard') : route('home') }}" class="flex items-center gap-2 text-white no-underline">
-                <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-white font-display text-lg font-bold text-ink-900">T</span>
-                <span class="font-display text-lg font-bold tracking-tight">TalentHub</span>
-            </a>
+                <x-logo />
 
             <div class="ml-4 hidden md:block">
                 @include('partials.nav')
             </div>
 
             <div class="ml-auto flex items-center gap-1">
+                @stack('header_actions')
                 @auth
                     <a href="{{ route('notifications.index') }}" class="relative flex h-11 w-11 items-center justify-center rounded-xl text-ink-100 hover:bg-ink-800" aria-label="Notifications{{ $unreadCount ? ', '.$unreadCount.' unread' : '' }}">
                         <x-icon name="bell"/>

@@ -41,8 +41,7 @@
     {{-- Sidebar: fixed on desktop, slide-in drawer on phones --}}
     <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 flex w-64 -translate-x-full flex-col bg-ink-900 pt-safe text-white transition-transform duration-200 md:translate-x-0" aria-label="Admin">
         <div class="flex h-14 shrink-0 items-center gap-2 px-5">
-            <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-white font-display text-lg font-bold text-ink-900">T</span>
-            <span class="font-display text-lg font-bold tracking-tight">TalentHub</span>
+            <x-logo />
             <button type="button" id="side-close" class="ml-auto flex h-10 w-10 items-center justify-center rounded-xl hover:bg-ink-800 md:hidden" aria-label="Close menu" data-allow-resubmit>
                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
             </button>

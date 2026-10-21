@@ -18,6 +18,10 @@ export default {
                 gold: {
                     100: '#fdf1c6', 300: '#f8d557', 400: '#f5c630', 500: '#f2b705', 600: '#c99200',
                 },
+                  // Coral: warm accent for the public home page.
+                coral: {
+                    50: '#fff1f3', 100: '#ffe0e5', 400: '#ff6b85', 500: '#ff385c', 600: '#e31c5f', 700: '#bd1a52',
+                },
             },
             fontFamily: {
                 display: ['"Bricolage Grotesque Variable"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
