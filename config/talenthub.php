@@ -12,6 +12,7 @@ return [
         'max_per_candidate' => 5,
         'extensions' => ['pdf', 'doc', 'docx'],
     ],
+        'cron_token' => env('CRON_TOKEN'),
 
     /*
     | Matching algorithm. Weights add up to 100, so a score is a percentage.

@@ -24,6 +24,9 @@ Route::post('/study-abroad', [LeadController::class, 'storeStudy'])->middleware(
 
 Route::get('/hire-talent', [LeadController::class, 'hire'])->name('hire.create');
 Route::post('/hire-talent', [LeadController::class, 'storeHire'])->middleware('throttle:forms')->name('hire.store');
+Route::get('/cron/{token}', \App\Http\Controllers\CronController::class)
+    ->middleware('throttle:90,1')
+    ->name('cron.run');
 
 // ---- Guests ---------------------------------------------------------------
 Route::middleware('guest')->group(function () {
