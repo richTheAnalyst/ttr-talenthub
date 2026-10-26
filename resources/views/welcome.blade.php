@@ -28,16 +28,18 @@
        {{--  <h1 class="mx-auto max-w-3xl font-display text-4xl font-bold leading-tight text-ink-900 sm:text-5xl">Find a job you'll love.<br class="hidden sm:block"> Or the country you'll study in.</h1>
         <p class="mx-auto mt-3 max-w-xl text-base text-ink-600">Upload your CV once, get matched to open roles, and track every application in one place.</p> --}}
 
+        <x-location-list />
+        <x-job-keyword-list />
         <form id="hero-search" action="{{ route('jobs.index') }}" method="GET" role="search"
               class="mx-auto mt-7 flex max-w-3xl flex-col gap-2 rounded-3xl border border-ink-200 bg-white p-3 text-left shadow-lg md:flex-row md:items-center md:gap-0 md:rounded-full md:p-2">
             <label class="flex-1 rounded-2xl px-4 py-2 hover:bg-ink-50 md:rounded-full">
                 <span class="block text-xs font-bold text-ink-900">What</span>
-                <input name="q" type="search" placeholder="Job title, skill or company" class="w-full border-0 bg-transparent p-0 text-sm text-ink-700 placeholder:text-ink-400 focus:ring-0">
+                   <input name="q" type="search" list="job-keywords" autocomplete="off" placeholder="Job title, skill or company" class="w-full border-0 bg-transparent p-0 text-sm text-ink-700 placeholder:text-ink-400 focus:ring-0">
             </label>
             <span class="hidden h-8 w-px bg-ink-200 md:block"></span>
             <label class="flex-1 rounded-2xl px-4 py-2 hover:bg-ink-50 md:rounded-full">
                 <span class="block text-xs font-bold text-ink-900">Where</span>
-                <input name="location" type="search" placeholder="City or country" class="w-full border-0 bg-transparent p-0 text-sm text-ink-700 placeholder:text-ink-400 focus:ring-0">
+                   <input name="location" type="search" list="locations" autocomplete="off" placeholder="City or country" class="w-full border-0 bg-transparent p-0 text-sm text-ink-700 placeholder:text-ink-400 focus:ring-0">
             </label>
             <span class="hidden h-8 w-px bg-ink-200 md:block"></span>
             <label class="flex-1 rounded-2xl px-4 py-2 hover:bg-ink-50 md:rounded-full">
@@ -110,7 +112,7 @@
                 <h2 id="study" class="text-2xl font-bold">Study abroad</h2>
                 <p class="text-sm text-ink-500">An adviser calls you within two working days.</p>
             </div>
-            <a href="{{ route('study.create') }}" class="text-sm font-semibold text-ink-900 underline">Start enquiry</a>
+            <a href="{{ route('study.create') }}" class="btn-primary btn-sm shrink-0 no-underline">Start enquiry</a>
         </div>
         <div class="-mx-4 flex snap-x gap-4 overflow-x-auto px-4 pb-2 sm:mx-0 sm:px-0">
             @foreach ($destinations as [$country, $grad])

@@ -3,15 +3,17 @@
 
 @section('content')
     <x-page-header title="Browse jobs" subtitle="Open roles from verified and new employers." />
+    <x-location-list />
+    <x-job-keyword-list />
 
     <form method="GET" action="{{ route('jobs.index') }}" class="card mb-5 grid gap-3 sm:grid-cols-[1fr_1fr_12rem_auto]" role="search">
         <div>
             <label for="q" class="label">Keyword</label>
-            <input id="q" name="q" type="search" value="{{ $filters['q'] ?? '' }}" placeholder="Title, skill or company" class="input">
+           <input id="q" name="q" type="search" list="job-keywords" autocomplete="off" value="{{ $filters['q'] ?? '' }}" placeholder="Title, skill or company" class="input">
         </div>
         <div>
             <label for="location" class="label">Location</label>
-            <input id="location" name="location" type="text" value="{{ $filters['location'] ?? '' }}" placeholder="e.g. Accra" class="input">
+           <input id="location" name="location" type="text" list="locations" autocomplete="off" value="{{ $filters['location'] ?? '' }}" placeholder="e.g. Accra" class="input">
         </div>
         <x-select name="type" label="Type" :options="\App\Enums\JobType::options()" :value="$filters['type'] ?? null" placeholder="Any type" />
         <div class="flex items-end gap-2">

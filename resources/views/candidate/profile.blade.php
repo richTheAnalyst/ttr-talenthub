@@ -16,8 +16,8 @@
             </div>
             <x-field name="headline" label="Headline" :value="$profile->headline" placeholder="e.g. Customer service professional with 3 years experience" />
             <div class="grid gap-4 sm:grid-cols-2">
-                <x-field name="location" label="Where you live" :value="$profile->location" placeholder="e.g. Accra" />
-                <x-field name="country" label="Country" :value="$profile->country" />
+                <x-field name="location" label="Where you live" :value="$profile->location" placeholder="e.g. Accra" list="locations" autocomplete="off" /><x-location-list />
+                <x-field name="desired_location" label="Preferred location" :value="$profile->desired_location" list="locations" autocomplete="off" />
             </div>
             <x-textarea name="bio" label="Short bio" :value="$profile->bio" rows="4" />
         </section>

@@ -8,7 +8,7 @@
             @csrf
             <h2 class="text-base font-semibold">New alert</h2>
             <x-field name="keywords" label="Keywords" placeholder="e.g. laravel, accountant" hint="Separate with commas. Leave empty for every job." />
-            <x-field name="location" label="Location" placeholder="e.g. Kumasi" />
+            <x-field name="location" label="Location" placeholder="e.g. Kumasi" list="locations" autocomplete="off" /><x-location-list />
             <x-select name="job_type" label="Job type" :options="\App\Enums\JobType::options()" placeholder="Any type" />
             <div>
                 <label for="min_match" class="label">Minimum match: <output id="min_match_out" for="min_match">{{ old('min_match', config('talenthub.matching.alert_min_score')) }}</output>%</label>
