@@ -9,6 +9,8 @@ class Cv extends Model
 {
     protected $table = 'cvs';
 
+    public const REVIEW_STATUSES = ['shortlisted' => 'Shortlisted', 'contacted' => 'Contacted', 'not_suitable' => 'Not suitable'];
+
     protected $guarded = [];
 
     protected function casts(): array

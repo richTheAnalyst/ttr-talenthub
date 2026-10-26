@@ -6,6 +6,7 @@
         <div>
             <h1 class="h-page">Study abroad with expert guidance</h1>
             <p class="muted mt-1 max-w-xl">Share your plans and a TTR adviser will help with course choice, applications, visas and funding. No account needed.</p>
+            <x-whatsapp-chat class="mt-3" message="Hello TTR, I would like advice on studying abroad." />
 
             <form method="POST" action="{{ route('study.store') }}" class="card mt-5 space-y-4">
                 @csrf

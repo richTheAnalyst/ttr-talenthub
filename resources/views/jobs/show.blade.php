@@ -23,7 +23,22 @@
                     <div><dt class="text-xs text-ink-500">Salary</dt><dd class="font-medium">{{ $job->salaryRange() ?? 'Not stated' }}</dd></div>
                     <div><dt class="text-xs text-ink-500">Experience</dt><dd class="font-medium">{{ $job->experience_min ? $job->experience_min.'+ years' : 'Entry level' }}</dd></div>
                     <div><dt class="text-xs text-ink-500">Closes</dt><dd class="font-medium">{{ $job->expires_at ? $job->expires_at->format('j M Y') : 'Open' }}</dd></div>
-                </dl>
+                                </dl>
+                <div class="mt-4 flex flex-wrap gap-2">
+                    <x-whatsapp-share :text="$job->title.' at '.$job->employer->company_name" :url="route('jobs.show', $job)">Share on WhatsApp</x-whatsapp-share>
+                    @auth
+                        @if (auth()->user()->isCandidate())
+                            @php $isSaved = auth()->user()->savedJobs()->whereKey($job->id)->exists(); @endphp
+                            <form method="POST" action="{{ route('candidate.saved.toggle', $job) }}">
+                                @csrf
+                                <button type="submit" class="btn-ghost btn-sm" aria-pressed="{{ $isSaved ? 'true' : 'false' }}">
+                                    <svg class="h-4 w-4 {{ $isSaved ? 'text-red-500' : 'text-ink-500' }}" viewBox="0 0 24 24" fill="{{ $isSaved ? 'currentColor' : 'none' }}" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 21s-7-4.4-9.3-9A5.4 5.4 0 0 1 12 6.5 5.4 5.4 0 0 1 21.3 12C19 16.6 12 21 12 21Z"/></svg>
+                                    {{ $isSaved ? 'Saved' : 'Save job' }}
+                                </button>
+                            </form>
+                        @endif
+                    @endauth
+                </div>
             </header>
 
             <section class="card">

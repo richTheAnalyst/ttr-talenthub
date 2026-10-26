@@ -19,7 +19,7 @@
             ['Alerts', 'candidate.alerts.index', 'bell', 'candidate.alerts.*'],
             ['Profile', 'candidate.profile.edit', 'user', 'candidate.profile.*'],
         ];
-        $more = [['Matches', 'candidate.matches', 'candidate.matches'], ['My CVs', 'candidate.cvs.index', 'candidate.cvs.*'], ['Study abroad', 'study.create', 'study.*']];
+        $more = [['Matches', 'candidate.matches', 'candidate.matches'],['Saved jobs', 'candidate.saved.index', 'candidate.saved.*'], ['My CVs', 'candidate.cvs.index', 'candidate.cvs.*'], ['Study abroad', 'study.create', 'study.*']];
     } elseif ($user->isEmployer()) {
         $items = [
             ['Home', 'employer.dashboard', 'home', 'employer.dashboard'],

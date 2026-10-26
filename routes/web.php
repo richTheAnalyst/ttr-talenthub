@@ -72,6 +72,9 @@ Route::prefix('candidate')->name('candidate.')->middleware(['auth', 'role:candid
     Route::post('/jobs/{job}/apply', [Candidate\ApplicationController::class, 'store'])->whereNumber('job')->name('jobs.apply');
     Route::patch('/applications/{application}/withdraw', [Candidate\ApplicationController::class, 'withdraw'])->whereNumber('application')->name('applications.withdraw');
 
+    Route::get('/saved', [Candidate\SavedJobController::class, 'index'])->name('saved.index');
+    Route::post('/jobs/{job}/save', [Candidate\SavedJobController::class, 'toggle'])->whereNumber('job')->name('saved.toggle');
+
     Route::get('/alerts', [Candidate\JobAlertController::class, 'index'])->name('alerts.index');
     Route::post('/alerts', [Candidate\JobAlertController::class, 'store'])->name('alerts.store');
     Route::patch('/alerts/{alert}', [Candidate\JobAlertController::class, 'toggle'])->whereNumber('alert')->name('alerts.toggle');
@@ -110,7 +113,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
 
     Route::get('/users', [Admin\UserController::class, 'index'])->name('users.index');
     Route::patch('/users/{user}/toggle', [Admin\UserController::class, 'toggle'])->whereNumber('user')->name('users.toggle');
-    Route::get('/cvs', [Admin\CvController::class, 'index'])->name('cvs.index');   // <-- add this
+    Route::get('/cvs', [Admin\CvController::class, 'index'])->name('cvs.index');  
+    Route::patch('/cvs/{cv}/review', [Admin\CvController::class, 'review'])->whereNumber('cv')->name('cvs.review');
 
 
     Route::get('/employers', [Admin\EmployerController::class, 'index'])->name('employers.index');

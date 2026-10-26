@@ -6,11 +6,13 @@ return [
     | Candidate CV uploads. Files live on the private "cvs" disk and are only
     | ever served through an authorised controller, never by a public URL.
     */
+    'whatsapp_number' => env('WHATSAPP_NUMBER'),
     'cv' => [
         'disk' => env('CV_DISK', 'cvs'), // 'cvs' (filesystem disk) or 'database'
         'max_kb' => 5120,
         'max_per_candidate' => 5,
         'extensions' => ['pdf', 'doc', 'docx'],
+        
     ],
         'cron_token' => env('CRON_TOKEN'),
 

@@ -77,4 +77,9 @@ class User extends Authenticatable
             default => 'candidate.dashboard',
         };
     }
+
+        public function savedJobs(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(JobPosting::class, 'saved_jobs')->withTimestamps();
+    }
 }
