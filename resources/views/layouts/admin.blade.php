@@ -18,6 +18,7 @@
         ['Dashboard', 'admin.dashboard', 'chart', 'admin.dashboard'],
         ['Leads', 'admin.leads.index', 'inbox', 'admin.leads.*'],
         ['Hiring requests', 'admin.hiring.index', 'briefcase', 'admin.hiring.*'],
+        ['Talent search', 'admin.talent.index', 'search', 'admin.talent.*'],
         ['CVs', 'admin.cvs.index', 'doc', 'admin.cvs.*'],
         ['Users', 'admin.users.index', 'users', 'admin.users.*'],
         ['Employers', 'admin.employers.index', 'building', 'admin.employers.*'],

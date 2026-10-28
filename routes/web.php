@@ -10,6 +10,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LeadController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PublicJobController;
+use App\Http\Controllers\Admin\TalentController;
 use Illuminate\Support\Facades\Route;
 
 // ---- Public ---------------------------------------------------------------
@@ -114,6 +115,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::get('/users', [Admin\UserController::class, 'index'])->name('users.index');
     Route::patch('/users/{user}/toggle', [Admin\UserController::class, 'toggle'])->whereNumber('user')->name('users.toggle');
     Route::get('/cvs', [Admin\CvController::class, 'index'])->name('cvs.index');  
+    Route::get('/talent', [Admin\TalentController::class, 'index'])->name('talent.index');
     Route::patch('/cvs/{cv}/review', [Admin\CvController::class, 'review'])->whereNumber('cv')->name('cvs.review');
 
 

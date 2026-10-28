@@ -18,6 +18,9 @@ Schedule::call(function () {
 // Nudge admins about leads nobody has contacted.
 Schedule::command('talenthub:remind-stale-leads')->dailyAt('08:00');
 
+// Monday recap for admins (UTC).
+Schedule::command('talenthub:weekly-summary')->weeklyOn(1, '08:00');
+
 // Housekeeping.
 Schedule::command('queue:prune-failed --hours=168')->daily();
 Schedule::command('auth:clear-resets')->daily();

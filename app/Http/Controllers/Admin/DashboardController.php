@@ -18,12 +18,12 @@ use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
-    public function index(): View
+    public function index(\App\Services\WeeklySummary $weekly): View
     {
         $leadsByStage = Lead::selectRaw('stage, count(*) as total')->groupBy('stage')->pluck('total', 'stage');
         $leadsByType = Lead::selectRaw('type, count(*) as total')->groupBy('type')->pluck('total', 'type');
         $appsByStatus = Application::selectRaw('status, count(*) as total')->groupBy('status')->pluck('total', 'status');
-
+           
         $stageRows = [];
         foreach (LeadStage::cases() as $stage) {
             $stageRows[] = ['label' => $stage->label(), 'badge' => $stage->badge(), 'total' => (int) ($leadsByStage[$stage->value] ?? 0), 'value' => $stage->value];
@@ -50,6 +50,7 @@ class DashboardController extends Controller
                 'new_requests' => HiringRequest::where('status', 'new')->count(),
                 'avg_completeness' => (int) round((float) CandidateProfile::avg('completeness')),
             ],
+             'week' => $weekly->build(),
             'stageRows' => $stageRows,
             'statusRows' => $statusRows,
             'typeRows' => $typeRows,

@@ -7,6 +7,13 @@ use Illuminate\Support\Str;
 
 class Skill extends Model
 {
+        public function candidateProfiles(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(CandidateProfile::class, 'candidate_skill');
+    }
+
+
+
     protected $fillable = ['name', 'slug'];
 
     /**
