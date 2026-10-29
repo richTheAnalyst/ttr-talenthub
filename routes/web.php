@@ -10,7 +10,6 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LeadController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PublicJobController;
-use App\Http\Controllers\Admin\TalentController;
 use Illuminate\Support\Facades\Route;
 
 // ---- Public ---------------------------------------------------------------
@@ -46,6 +45,9 @@ Route::middleware('guest')->group(function () {
 Route::middleware(['auth', 'role:candidate,employer,admin'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('/dashboard', [HomeController::class, 'dashboard'])->name('dashboard');
+
+    Route::post('/push/subscribe', [\App\Http\Controllers\PushSubscriptionController::class, 'store'])->middleware('throttle:30,1')->name('push.subscribe');
+    Route::post('/push/unsubscribe', [\App\Http\Controllers\PushSubscriptionController::class, 'destroy'])->middleware('throttle:30,1')->name('push.unsubscribe');
 
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::post('/notifications/read-all', [NotificationController::class, 'readAll'])->name('notifications.read-all');
@@ -114,10 +116,14 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
 
     Route::get('/users', [Admin\UserController::class, 'index'])->name('users.index');
     Route::patch('/users/{user}/toggle', [Admin\UserController::class, 'toggle'])->whereNumber('user')->name('users.toggle');
-    Route::get('/cvs', [Admin\CvController::class, 'index'])->name('cvs.index');  
+    Route::get('/cvs', [Admin\CvController::class, 'index'])->name('cvs.index');
+    Route::get('/applications', [Admin\ApplicationController::class, 'index'])->name('applications.index');
+    Route::patch('/applications/{application}/status', [Admin\ApplicationController::class, 'update'])->whereNumber('application')->name('applications.update');
     Route::get('/talent', [Admin\TalentController::class, 'index'])->name('talent.index');
     Route::patch('/cvs/{cv}/review', [Admin\CvController::class, 'review'])->whereNumber('cv')->name('cvs.review');
 
+    Route::get('/settings', [Admin\SettingsController::class, 'edit'])->name('settings.edit');
+    Route::put('/settings', [Admin\SettingsController::class, 'update'])->name('settings.update');
 
     Route::get('/employers', [Admin\EmployerController::class, 'index'])->name('employers.index');
     Route::patch('/employers/{employer}/verify', [Admin\EmployerController::class, 'verify'])->whereNumber('employer')->name('employers.verify');

@@ -9,7 +9,11 @@ use App\Models\Cv;
 use App\Models\JobPosting;
 use App\Models\User;
 use App\Notifications\ApplicationStatusChanged;
+use App\Notifications\CandidateHired;
+use App\Notifications\NewApplicationForReview;
 use App\Notifications\NewApplicationReceived;
+use Illuminate\Support\Facades\Notification;
+use App\Enums\Role;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -70,6 +74,9 @@ class ApplicationService
 
         $job->employer->user->notify(new NewApplicationReceived($application));
 
+        // Admins review every application, so they get an alert too.
+        Notification::send(User::where('role', Role::Admin->value)->where('is_active', true)->get(), new NewApplicationForReview($application));
+
         return $application;
     }
 
@@ -100,6 +107,12 @@ class ApplicationService
         if ($to !== ApplicationStatus::Withdrawn) {
             $application->loadMissing('job.employer', 'candidate');
             $application->candidate->notify(new ApplicationStatusChanged($application, $note));
+        }
+
+        // Hired: give the employer everything they need to contact the new employee.
+        if ($to === ApplicationStatus::Hired) {
+            $application->loadMissing('job.employer.user');
+            $application->job->employer->user->notify(new CandidateHired($application));
         }
 
         return $application->refresh();

@@ -16,6 +16,7 @@ class ApplicationStatusChanged extends Notification implements ShouldQueue
     public string $jobTitle;
     public string $company;
     public string $statusLabel;
+    public string $statusValue;
     public ?string $note;
 
     public function __construct(Application $application, ?string $note = null)
@@ -26,6 +27,7 @@ class ApplicationStatusChanged extends Notification implements ShouldQueue
         $this->jobTitle = $application->job->title;
         $this->company = $application->job->employer->company_name;
         $this->statusLabel = $application->status->label();
+        $this->statusValue = $application->status->value;
         $this->note = $note;
     }
 
@@ -34,15 +36,33 @@ class ApplicationStatusChanged extends Notification implements ShouldQueue
         return ['database', 'mail'];
     }
 
+    private function headline(): string
+    {
+        return match ($this->statusValue) {
+            'accepted' => 'Your application was accepted',
+            'hired' => 'Congratulations, you got the job!',
+            default => "Application {$this->statusLabel}",
+        };
+    }
+
+    private function message(): string
+    {
+        return match ($this->statusValue) {
+            'accepted' => "Good news! Your application for {$this->jobTitle} at {$this->company} has been accepted. The employer will review it next.",
+            'hired' => "Congratulations! {$this->company} has accepted you for the {$this->jobTitle} role. They will contact you with the next steps.",
+            default => "{$this->company} moved your application for {$this->jobTitle} to {$this->statusLabel}.",
+        };
+    }
+
     public function toMail(object $notifiable): MailMessage
     {
         $mail = (new MailMessage)
-            ->subject("Your application for {$this->jobTitle}: {$this->statusLabel}")
+            ->subject($this->headline().': '.$this->jobTitle)
             ->greeting("Hello {$notifiable->name},")
-            ->line("{$this->company} updated your application for {$this->jobTitle}. It is now: {$this->statusLabel}.");
+            ->line($this->message());
 
         if ($this->note) {
-            $mail->line("Message from the employer: {$this->note}");
+            $mail->line("Message: {$this->note}");
         }
 
         return $mail->action('Track your application', route('candidate.applications.show', $this->applicationId));
@@ -51,8 +71,8 @@ class ApplicationStatusChanged extends Notification implements ShouldQueue
     public function toArray(object $notifiable): array
     {
         return [
-            'title' => "Application {$this->statusLabel}",
-            'body' => "{$this->company} moved your application for {$this->jobTitle} to {$this->statusLabel}.",
+            'title' => $this->headline(),
+            'body' => $this->message(),
             'url' => route('candidate.applications.show', $this->applicationId, false),
         ];
     }

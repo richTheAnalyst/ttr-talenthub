@@ -22,6 +22,20 @@ return [
             'throw' => false,
             'report' => false,
         ],
+                   'neon' => [
+               'driver' => 's3',
+               'key' => env('NEON_S3_KEY'),
+               'secret' => env('NEON_S3_SECRET'),
+               'region' => env('NEON_S3_REGION', 'eu-central-1'),
+               'bucket' => env('NEON_S3_BUCKET'),
+               'endpoint' => env('NEON_S3_ENDPOINT'),
+               'use_path_style_endpoint' => true,
+               'visibility' => 'private',
+               'throw' => true,
+               'report' => false,
+               'request_checksum_calculation' => 'when_required',
+               'response_checksum_validation' => 'when_required',
+           ],
 
         // Candidate CVs. Private: no public URL exists for this disk.
                // Candidate CVs. Private: no public URL exists for this disk.

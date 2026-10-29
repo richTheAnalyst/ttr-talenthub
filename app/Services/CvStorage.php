@@ -4,7 +4,7 @@ namespace App\Services;
 
 use App\Models\Cv;
 use App\Models\User;
-use Illuminate\Contracts\Filesystem\Filesystem;
+use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -15,9 +15,9 @@ use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
- * All CV file handling lives here. Files are written under a random name and
- * can only be read back through download(), which callers must authorise
- * first (see CvPolicy).
+ * All CV file handling lives here. Files are written to a private disk under a
+ * random name and can only be read back through download(), which callers
+ * must authorise first (see CvPolicy).
  */
 class CvStorage
 {
@@ -29,11 +29,10 @@ class CvStorage
         return ['required', 'file', 'mimes:'.$extensions, 'max:'.config('talenthub.cv.max_kb')];
     }
 
-    public function disk(): Filesystem
-    {
-        return Storage::disk(config('talenthub.cv.disk'));
-    }
-
+           public function disk(): FilesystemAdapter
+       {
+           return Storage::disk(config('talenthub.cv.disk'));
+       }
     public function store(User $user, UploadedFile $file): Cv
     {
         $max = (int) config('talenthub.cv.max_per_candidate');
@@ -98,10 +97,11 @@ class CvStorage
             }, $cv->original_name, ['Content-Type' => $cv->mime ?: 'application/octet-stream']);
         }
 
-        if ($this->usesDatabase()) {
-            $data = DB::table('cv_files')->where('path', $cv->path)->value('data');
-            abort_if($data === null, 404, 'This file is no longer available.');
+        // A file saved in the database is served from there whatever CV_DISK says now,
+        // so a local .env that differs from production cannot hide it.
+        $data = DB::table('cv_files')->where('path', $cv->path)->value('data');
 
+        if ($data !== null) {
             $bytes = base64_decode($data, true) ?: '';
 
             return response()->streamDownload(function () use ($bytes) {
@@ -109,9 +109,22 @@ class CvStorage
             }, $cv->original_name, ['Content-Type' => $cv->mime ?: 'application/octet-stream']);
         }
 
-        abort_unless($this->disk()->exists($cv->path), 404, 'This file is no longer available.');
+        // The configured filesystem disk (the local one, or a bucket such as Neon Object Storage).
+        if (! $this->usesDatabase() && ! $this->usesCloudinary()) {
+            try {
+                if ($this->disk()->exists($cv->path)) {
+                    return $this->disk()->download($cv->path, $cv->original_name);
+                }
+            } catch (\Throwable $e) {
+                Log::error('CV storage check failed: '.$this->reason($e), ['path' => $cv->path]);
+            }
+        }
 
-        return $this->disk()->download($cv->path, $cv->original_name);
+        // Files saved on the server's own disk before the storage mode changed are still served from there.
+        $local = Storage::disk('cvs');
+        abort_unless($local->exists($cv->path), 404, 'This file is no longer available.');
+
+        return $local->download($cv->path, $cv->original_name);
     }
 
     private function usesCloudinary(): bool
@@ -147,7 +160,30 @@ class CvStorage
             return $path;
         }
 
-        return $this->disk()->putFileAs($directory, $file, $name);
+        try {
+            $stored = $this->disk()->putFileAs($directory, $file, $name);
+        } catch (\Throwable $e) {
+            Log::error('CV storage upload failed: '.$this->reason($e));
+            $stored = false;
+        }
+
+        if (! $stored) {
+            throw ValidationException::withMessages([
+                'cv' => 'We could not save your CV right now. Please try again in a moment.',
+            ]);
+        }
+
+        return $stored;
+    }
+
+    /** The innermost error message, which is where the real cause (SSL, keys, DNS) shows up. */
+    private function reason(\Throwable $e): string
+    {
+        while ($e->getPrevious()) {
+            $e = $e->getPrevious();
+        }
+
+        return mb_substr($e->getMessage(), 0, 500);
     }
 
     private function remove(string $path): void

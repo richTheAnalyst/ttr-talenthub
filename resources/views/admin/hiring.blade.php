@@ -23,7 +23,7 @@
                             <p class="text-xs text-ink-500"><a href="mailto:{{ $r->contact_email }}">{{ $r->contact_email }}</a>@if ($r->contact_phone) · <a href="tel:{{ $r->contact_phone }}">{{ $r->contact_phone }}</a>@endif</p>
                         </div>
                         <div class="flex flex-col items-end gap-1">
-                            <x-badge :color="match ($r->status) { 'new' => 'blue', 'in_progress' => 'amber', 'fulfilled' => 'green', default => 'slate' }">{{ $r->statusLabel() }}</x-badge>
+                            <x-badge :color="match ($r->status) { 'new' => 'blue', 'accepted' => 'green', 'in_progress' => 'amber', 'fulfilled' => 'green', default => 'slate' }">{{ $r->statusLabel() }}</x-badge>
                             @if ($r->urgency === 'high')<x-badge color="red">Urgent</x-badge>@endif
                         </div>
                     </div>

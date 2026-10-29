@@ -9,6 +9,7 @@ class HiringRequest extends Model
 {
     public const STATUSES = [
         'new' => 'New',
+        'accepted' => 'Accepted',
         'in_progress' => 'In progress',
         'fulfilled' => 'Fulfilled',
         'cancelled' => 'Cancelled',

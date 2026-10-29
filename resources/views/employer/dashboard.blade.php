@@ -5,6 +5,7 @@
         <a href="{{ route('employer.jobs.create') }}" class="btn-gold no-underline"><x-icon name="plus" class="h-5 w-5"/> Post a job</a>
     </x-page-header>
 
+    @include('partials.recent-updates')
     @unless ($employer->isVerified())
         <div class="mb-5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
             Your company is not verified yet. Jobs can still be posted. <a href="{{ route('employer.company.edit') }}" class="font-semibold">Complete your company details</a> to speed up verification.

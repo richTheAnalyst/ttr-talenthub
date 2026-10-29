@@ -7,6 +7,7 @@ enum ApplicationStatus: string
     use Options;
 
     case Submitted = 'submitted';
+    case Accepted = 'accepted';
     case UnderReview = 'under_review';
     case Shortlisted = 'shortlisted';
     case Interview = 'interview';
@@ -19,6 +20,7 @@ enum ApplicationStatus: string
     {
         return match ($this) {
             self::Submitted => 'Submitted',
+            self::Accepted => 'Accepted',
             self::UnderReview => 'Under review',
             self::Shortlisted => 'Shortlisted',
             self::Interview => 'Interview',
@@ -34,6 +36,7 @@ enum ApplicationStatus: string
     {
         return match ($this) {
             self::Submitted, self::Withdrawn => 'slate',
+            self::Accepted => 'teal',
             self::UnderReview => 'blue',
             self::Shortlisted => 'violet',
             self::Interview => 'amber',
@@ -55,7 +58,24 @@ enum ApplicationStatus: string
      */
     public static function pipeline(): array
     {
-        return [self::Submitted, self::UnderReview, self::Shortlisted, self::Interview, self::Offered, self::Hired];
+        return [self::Submitted, self::Accepted, self::UnderReview, self::Shortlisted, self::Interview, self::Offered, self::Hired];
+    }
+
+    /**
+     * Statuses an administrator may move an application to.
+     *
+     * @return array<string,string>
+     */
+    public static function adminChoices(): array
+    {
+        $choices = [];
+        foreach (self::cases() as $case) {
+            if (! in_array($case, [self::Submitted, self::Withdrawn], true)) {
+                $choices[$case->value] = $case->label();
+            }
+        }
+
+        return $choices;
     }
 
     /**

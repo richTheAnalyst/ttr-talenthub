@@ -64,7 +64,12 @@ class TalentController extends Controller
             'skillTokens' => $skills,
             'searched' => $searched,
             'education' => config('talenthub.education_levels'),
-            'popularSkills' => Skill::query()->withCount('candidateProfiles')->orderByDesc('candidate_profiles_count')->limit(12)->pluck('name'),
+            'popularSkills' => \Illuminate\Support\Facades\DB::table('candidate_skill')
+                ->join('skills', 'skills.id', '=', 'candidate_skill.skill_id')
+                ->groupBy('skills.name')
+                ->orderByRaw('count(*) desc')
+                ->limit(12)
+                ->pluck('skills.name'),
             'total' => CandidateProfile::searchable()->count(),
         ]);
     }
