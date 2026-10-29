@@ -22,7 +22,7 @@ return [
             'throw' => false,
             'report' => false,
         ],
-                   'neon' => [
+         'neon' => [
                'driver' => 's3',
                'key' => env('NEON_S3_KEY'),
                'secret' => env('NEON_S3_SECRET'),
