@@ -27,7 +27,7 @@ class ApplicantController extends Controller
         $status = $request->query('status');
 
         $applications = $job->applications()
-            ->with(['candidate.candidateProfile.skills', 'cv'])
+            ->with(['candidate.candidateProfile.skills', 'cv', 'interviews'])
             ->when($status && ApplicationStatus::tryFrom($status), fn ($q) => $q->where('status', $status))
             ->orderByDesc('match_score')
             ->get();

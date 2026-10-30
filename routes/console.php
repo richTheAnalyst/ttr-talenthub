@@ -18,6 +18,9 @@ Schedule::call(function () {
 // Nudge admins about leads nobody has contacted.
 Schedule::command('talenthub:remind-stale-leads')->dailyAt('08:00');
 
+// Remind both sides about confirmed interviews in the next 24 hours.
+Schedule::command('talenthub:interview-reminders')->everyTenMinutes();
+
 // Monday recap for admins (UTC).
 Schedule::command('talenthub:weekly-summary')->weeklyOn(1, '08:00');
 

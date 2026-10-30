@@ -84,8 +84,12 @@ class JobController extends Controller
 
     private function savedMessage(JobPosting $job): string
     {
-        return $job->status === JobPosting::STATUS_OPEN
-            ? 'Job published. Matching candidates are being notified.'
-            : 'Draft saved. Publish it when you are ready.';
+        if ($job->status !== JobPosting::STATUS_OPEN) {
+            return 'Draft saved. Publish it when you are ready.';
+        }
+
+        return $job->isAwaitingApproval()
+            ? 'Job submitted. It goes live as soon as TTR approves it, and you will be notified.'
+            : 'Job saved.';
     }
 }

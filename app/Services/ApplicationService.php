@@ -7,6 +7,8 @@ use App\Models\Application;
 use App\Models\CandidateProfile;
 use App\Models\Cv;
 use App\Models\JobPosting;
+use App\Models\Placement;
+use App\Models\Setting;
 use App\Models\User;
 use App\Notifications\ApplicationStatusChanged;
 use App\Notifications\CandidateHired;
@@ -104,15 +106,26 @@ class ApplicationService
             ]);
         });
 
+        $application->loadMissing('job.employer', 'candidate');
+
         if ($to !== ApplicationStatus::Withdrawn) {
-            $application->loadMissing('job.employer', 'candidate');
             $application->candidate->notify(new ApplicationStatusChanged($application, $note));
+        }
+
+        // Admins act as the middleman, so they hear about what employers and candidates do.
+        if ($actor && ! $actor->isAdmin()) {
+            AdminAlerts::notify(
+                'Application update',
+                "{$actor->name} set {$application->candidate->name}'s application for {$application->job->title} ({$application->job->employer->company_name}) to {$to->label()}.",
+                route('admin.applications.index', [], false)
+            );
         }
 
         // Hired: give the employer everything they need to contact the new employee.
         if ($to === ApplicationStatus::Hired) {
             $application->loadMissing('job.employer.user');
             $application->job->employer->user->notify(new CandidateHired($application));
+            $this->recordPlacement($application);
         }
 
         return $application->refresh();
@@ -125,5 +138,43 @@ class ApplicationService
         }
 
         return $this->changeStatus($application, ApplicationStatus::Withdrawn, 'Withdrawn by the candidate.', $actor);
+    }
+
+    /** Record the hire so the monthly commission can be tracked. Admins can correct the salary and rate. */
+    private function recordPlacement(Application $application): void
+    {
+        $job = $application->job;
+
+        $salary = match (true) {
+            $job->salary_min && $job->salary_max => (int) round(($job->salary_min + $job->salary_max) / 2),
+            (bool) $job->salary_min => (int) $job->salary_min,
+            (bool) $job->salary_max => (int) $job->salary_max,
+            default => null,
+        };
+
+        $outsourcing = $job->engagement === 'outsourcing';
+
+        Placement::firstOrCreate(
+            ['application_id' => $application->id],
+            [
+                'employer_id' => $job->employer_id,
+                'user_id' => $application->user_id,
+                'engagement' => $job->engagement ?: 'recruitment',
+                'monthly_salary' => $salary,
+                'client_monthly' => $outsourcing ? $job->client_budget : null,
+                'one_time_fee' => $outsourcing ? null : $job->placement_fee,
+                'currency' => $job->currency ?: 'GHS',
+                'commission_rate' => (float) ($job->fee_rate ?? Setting::read('commission_rate', '15')),
+                'starts_on' => now()->toDateString(),
+                'status' => 'active',
+            ]
+        );
+
+        AdminAlerts::notify(
+            'New placement recorded',
+            "{$application->candidate->name} was hired for {$job->title} at {$job->employer->company_name}. Check the money details on the Placements page.",
+            route('admin.placements.index', [], false),
+            force: true
+        );
     }
 }

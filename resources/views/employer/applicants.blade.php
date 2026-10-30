@@ -44,6 +44,8 @@
                                 @if ($a->candidate->phone)<a href="tel:{{ $a->candidate->phone }}" class="btn-ghost btn-sm no-underline">Call</a>@endif
                             </div>
 
+                            @include('employer._interview')
+
                             @if ($a->status !== \App\Enums\ApplicationStatus::Withdrawn)
                                 <form method="POST" action="{{ route('employer.applications.status', $a) }}" class="mt-4 grid gap-2 border-t border-ink-100 pt-4 sm:grid-cols-[12rem_1fr_auto]">
                                     @csrf @method('PATCH')

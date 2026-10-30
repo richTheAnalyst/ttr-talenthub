@@ -35,6 +35,11 @@ class Application extends Model
         return $this->belongsTo(Cv::class);
     }
 
+    public function interviews(): HasMany
+    {
+        return $this->hasMany(Interview::class)->orderByDesc('scheduled_at');
+    }
+
     public function histories(): HasMany
     {
         return $this->hasMany(ApplicationStatusHistory::class)->oldest();

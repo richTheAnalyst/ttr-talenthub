@@ -37,7 +37,7 @@ class ApplicationController extends Controller
     {
         Gate::authorize('view', $application);
 
-        $application->load(['job.employer', 'cv', 'histories.author']);
+        $application->load(['job.employer', 'cv', 'histories.author', 'interviews']);
 
         return view('candidate.applications.show', compact('application'));
     }

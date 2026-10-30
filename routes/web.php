@@ -24,9 +24,6 @@ Route::post('/study-abroad', [LeadController::class, 'storeStudy'])->middleware(
 
 Route::get('/hire-talent', [LeadController::class, 'hire'])->name('hire.create');
 Route::post('/hire-talent', [LeadController::class, 'storeHire'])->middleware('throttle:forms')->name('hire.store');
-Route::get('/cron/{token}', \App\Http\Controllers\CronController::class)
-    ->middleware('throttle:90,1')
-    ->name('cron.run');
 
 // ---- Guests ---------------------------------------------------------------
 Route::middleware('guest')->group(function () {
@@ -74,6 +71,7 @@ Route::prefix('candidate')->name('candidate.')->middleware(['auth', 'role:candid
     Route::get('/applications/{application}', [Candidate\ApplicationController::class, 'show'])->whereNumber('application')->name('applications.show');
     Route::post('/jobs/{job}/apply', [Candidate\ApplicationController::class, 'store'])->whereNumber('job')->name('jobs.apply');
     Route::patch('/applications/{application}/withdraw', [Candidate\ApplicationController::class, 'withdraw'])->whereNumber('application')->name('applications.withdraw');
+    Route::patch('/interviews/{interview}/respond', [Candidate\InterviewController::class, 'respond'])->whereNumber('interview')->name('interviews.respond');
 
     Route::get('/saved', [Candidate\SavedJobController::class, 'index'])->name('saved.index');
     Route::post('/jobs/{job}/save', [Candidate\SavedJobController::class, 'toggle'])->whereNumber('job')->name('saved.toggle');
@@ -97,6 +95,8 @@ Route::prefix('employer')->name('employer.')->middleware(['auth', 'role:employer
     Route::get('/jobs/{job}/applicants', [Employer\ApplicantController::class, 'index'])->whereNumber('job')->name('jobs.applicants');
     Route::post('/jobs/{job}/invite/{profile}', [Employer\ApplicantController::class, 'invite'])->whereNumber(['job', 'profile'])->name('jobs.invite');
     Route::patch('/applications/{application}/status', [Employer\ApplicantController::class, 'updateStatus'])->whereNumber('application')->name('applications.status');
+    Route::post('/applications/{application}/interviews', [Employer\InterviewController::class, 'store'])->whereNumber('application')->name('interviews.store');
+    Route::patch('/interviews/{interview}/cancel', [Employer\InterviewController::class, 'cancel'])->whereNumber('interview')->name('interviews.cancel');
 
     Route::get('/hiring', [Employer\HiringRequestController::class, 'index'])->name('hiring.index');
     Route::get('/hiring/new', [Employer\HiringRequestController::class, 'create'])->name('hiring.create');
@@ -117,13 +117,16 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::get('/users', [Admin\UserController::class, 'index'])->name('users.index');
     Route::patch('/users/{user}/toggle', [Admin\UserController::class, 'toggle'])->whereNumber('user')->name('users.toggle');
     Route::get('/cvs', [Admin\CvController::class, 'index'])->name('cvs.index');
+
     Route::get('/applications', [Admin\ApplicationController::class, 'index'])->name('applications.index');
     Route::patch('/applications/{application}/status', [Admin\ApplicationController::class, 'update'])->whereNumber('application')->name('applications.update');
+
     Route::get('/talent', [Admin\TalentController::class, 'index'])->name('talent.index');
     Route::patch('/cvs/{cv}/review', [Admin\CvController::class, 'review'])->whereNumber('cv')->name('cvs.review');
 
     Route::get('/settings', [Admin\SettingsController::class, 'edit'])->name('settings.edit');
     Route::put('/settings', [Admin\SettingsController::class, 'update'])->name('settings.update');
+
 
     Route::get('/employers', [Admin\EmployerController::class, 'index'])->name('employers.index');
     Route::patch('/employers/{employer}/verify', [Admin\EmployerController::class, 'verify'])->whereNumber('employer')->name('employers.verify');

@@ -16,6 +16,8 @@
                 <div class="mt-5"><x-tracker :status="$application->status" /></div>
             </section>
 
+            @include('candidate.applications._interview')
+
             <section class="card">
                 <h2 class="text-lg font-semibold">History</h2>
                 <ol class="mt-3 space-y-4 border-l-2 border-ink-200 pl-4">

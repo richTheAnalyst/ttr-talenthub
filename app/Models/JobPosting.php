@@ -16,6 +16,10 @@ class JobPosting extends Model
     public const STATUS_OPEN = 'open';
     public const STATUS_CLOSED = 'closed';
 
+    public const APPROVAL_PENDING = 'pending';
+    public const APPROVAL_APPROVED = 'approved';
+    public const APPROVAL_REJECTED = 'rejected';
+
     protected $table = 'job_postings';
 
     protected $guarded = [];
@@ -26,9 +30,13 @@ class JobPosting extends Model
             'job_type' => JobType::class,
             'published_at' => 'datetime',
             'expires_at' => 'datetime',
+            'approved_at' => 'datetime',
             'salary_min' => 'integer',
             'salary_max' => 'integer',
             'experience_min' => 'integer',
+            'client_budget' => 'integer',
+            'placement_fee' => 'integer',
+            'fee_rate' => 'float',
         ];
     }
 
@@ -51,6 +59,7 @@ class JobPosting extends Model
     public function scopeOpen(Builder $query): Builder
     {
         return $query->where('status', self::STATUS_OPEN)
+            ->where('approval_status', self::APPROVAL_APPROVED)
             ->where(fn (Builder $q) => $q->whereNull('expires_at')->orWhere('expires_at', '>', now()));
     }
 
@@ -78,10 +87,30 @@ class JobPosting extends Model
         return $query;
     }
 
+    public const ENGAGEMENTS = ['outsourcing' => 'Outsourcing', 'recruitment' => 'Recruitment'];
+
+    public function isOutsourcing(): bool
+    {
+        return $this->engagement === 'outsourcing';
+    }
+
+    /** What the worker earns after TTR keeps its percentage of the client's budget. */
+    public function workerPay(float $rate): int
+    {
+        return (int) floor(((int) $this->client_budget) * (100 - $rate) / 100);
+    }
+
     public function isOpen(): bool
     {
         return $this->status === self::STATUS_OPEN
+            && $this->approval_status === self::APPROVAL_APPROVED
             && ($this->expires_at === null || $this->expires_at->isFuture());
+    }
+
+    /** Published by the employer but not yet approved by an admin. */
+    public function isAwaitingApproval(): bool
+    {
+        return $this->status === self::STATUS_OPEN && $this->approval_status === self::APPROVAL_PENDING;
     }
 
     public function salaryRange(): ?string

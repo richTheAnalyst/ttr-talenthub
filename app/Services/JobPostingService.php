@@ -7,7 +7,11 @@ use App\Models\Employer;
 use App\Models\JobPosting;
 use App\Models\Skill;
 use Illuminate\Support\Arr;
+use App\Notifications\JobApprovalNotice;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
+use App\Enums\Role;
+use App\Models\User;
 
 class JobPostingService
 {
@@ -17,15 +21,21 @@ class JobPostingService
      *
      * @param  array<string,mixed>  $data  validated input; "action" is "publish" or "draft"
      */
-    public function save(Employer $employer, ?JobPosting $job, array $data): JobPosting
+    public function save(Employer $employer, ?JobPosting $job, array $data, bool $autoApprove = false): JobPosting
     {
-        return DB::transaction(function () use ($employer, $job, $data) {
+        $needsReview = false;
+
+        $saved = DB::transaction(function () use ($employer, $job, $data, $autoApprove, &$needsReview) {
             $publish = ($data['action'] ?? 'draft') === 'publish';
 
             $attributes = Arr::only($data, [
                 'title', 'description', 'location', 'country', 'job_type', 'salary_min', 'salary_max',
-                'currency', 'experience_min', 'education_level', 'expires_at',
+                'currency', 'experience_min', 'education_level', 'expires_at', 'engagement', 'client_budget',
             ]);
+            $attributes['engagement'] ??= 'recruitment';
+            if ($attributes['engagement'] !== 'outsourcing') {
+                $attributes['client_budget'] = null;
+            }
             $attributes['experience_min'] = (int) ($attributes['experience_min'] ?? 0);
 
             if ($job === null) {
@@ -43,6 +53,19 @@ class JobPostingService
                 $job->published_at = now();
             }
 
+            // Every new or edited live job waits for an admin, unless an admin made the change.
+            if ($publish || $wasOpen) {
+                if ($autoApprove) {
+                    $job->approval_status = JobPosting::APPROVAL_APPROVED;
+                    $job->approval_note = null;
+                    $job->approved_at ??= now();
+                } else {
+                    $job->approval_status = JobPosting::APPROVAL_PENDING;
+                    $job->approval_note = null;
+                    $needsReview = true;
+                }
+            }
+
             $job->save();
 
             $sync = [];
@@ -54,12 +77,22 @@ class JobPostingService
             }
             $job->skills()->sync($sync);
 
-            if ($publish && ! $wasOpen) {
+            // Matching and alerts run when an admin approves the job (or right away if an admin posted it).
+            if ($autoApprove && $publish && ! $wasOpen) {
                 ProcessNewJobPosting::dispatch($job->id)->afterCommit();
             }
 
             return $job->load('skills');
         });
+
+        if ($needsReview) {
+            Notification::send(
+                User::where('role', Role::Admin->value)->where('is_active', true)->get(),
+                new JobApprovalNotice($saved, 'submitted')
+            );
+        }
+
+        return $saved;
     }
 
     /** Validation rules shared by the employer form and any future API. */
@@ -79,6 +112,8 @@ class JobPostingService
             'expires_at' => ['nullable', 'date', 'after:today'],
             'required_skills' => ['nullable', 'string', 'max:600'],
             'optional_skills' => ['nullable', 'string', 'max:600'],
+            'engagement' => ['required', 'in:outsourcing,recruitment'],
+            'client_budget' => ['nullable', 'required_if:engagement,outsourcing', 'integer', 'min:1', 'max:10000000'],
             'action' => ['required', 'in:draft,publish'],
         ];
     }

@@ -23,7 +23,7 @@ class ApplicationController extends Controller
         $like = Db::like();
 
         $applications = Application::query()
-            ->with(['candidate:id,name,email,phone', 'job.employer', 'cv'])
+            ->with(['candidate:id,name,email,phone', 'job.employer', 'cv', 'interviews'])
             ->when($status, fn (Builder $b) => $b->where('status', $status))
             ->when($q !== '', function (Builder $b) use ($q, $like) {
                 $term = Db::contains($q);
