@@ -7,6 +7,7 @@ use App\Models\Application;
 use App\Models\Cv;
 use App\Support\Db;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -24,6 +25,7 @@ class CvController extends Controller
         $type = array_key_exists((string) $request->query('type'), self::TYPES) ? (string) $request->query('type') : '';
         $range = array_key_exists((string) $request->query('range'), self::RANGES) ? (string) $request->query('range') : '';
         $sort = array_key_exists((string) $request->query('sort'), self::SORTS) ? (string) $request->query('sort') : 'newest';
+        $review = array_key_exists((string) $request->query('review'), Cv::REVIEW_STATUSES) ? (string) $request->query('review') : '';
         $primary = $request->boolean('primary');
         $used = $request->boolean('used');
         $like = Db::like();
@@ -40,6 +42,7 @@ class CvController extends Controller
             })
             ->when($type !== '', fn (Builder $b) => $b->where('cvs.original_name', $like, '%.'.$type))
             ->when($range !== '', fn (Builder $b) => $b->where('cvs.created_at', '>=', now()->subDays((int) $range)))
+            ->when($review !== '', fn (Builder $b) => $b->where('cvs.review_status', $review))
             ->when($primary, fn (Builder $b) => $b->where('cvs.is_primary', true))
             ->when($used, fn (Builder $b) => $b->whereIn('cvs.id', Application::query()->select('cv_id')->whereNotNull('cv_id')));
 
@@ -58,7 +61,8 @@ class CvController extends Controller
 
         return view('admin.cvs', [
             'cvs' => $query->simplePaginate(20)->withQueryString(),
-            'filters' => compact('q', 'type', 'range', 'sort', 'primary', 'used'),
+            'filters' => compact('q', 'type', 'range', 'sort', 'primary', 'used', 'review'),
+            'reviewStatuses' => Cv::REVIEW_STATUSES,
             'types' => self::TYPES,
             'ranges' => self::RANGES,
             'sorts' => self::SORTS,
@@ -69,5 +73,20 @@ class CvController extends Controller
                 'mb' => round(((int) $row->bytes) / 1048576, 1),
             ],
         ]);
+    }
+
+    public function review(Request $request, Cv $cv): RedirectResponse
+    {
+        $data = $request->validate([
+            'review_status' => ['nullable', 'in:'.implode(',', array_keys(Cv::REVIEW_STATUSES))],
+            'admin_notes' => ['nullable', 'string', 'max:2000'],
+        ]);
+
+        $cv->update([
+            'review_status' => $data['review_status'] ?: null,
+            'admin_notes' => $data['admin_notes'] ?: null,
+        ]);
+
+        return back()->with('status', 'CV updated.');
     }
 }

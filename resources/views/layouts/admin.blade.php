@@ -18,11 +18,14 @@
         ['Dashboard', 'admin.dashboard', 'chart', 'admin.dashboard'],
         ['Leads', 'admin.leads.index', 'inbox', 'admin.leads.*'],
         ['Hiring requests', 'admin.hiring.index', 'briefcase', 'admin.hiring.*'],
+        ['Approvals', 'admin.approvals.index', 'bell', 'admin.approvals.*'],
         ['Applications', 'admin.applications.index', 'briefcase', 'admin.applications.*'],
+        ['Placements', 'admin.placements.index', 'users', 'admin.placements.*'],
         ['Talent search', 'admin.talent.index', 'search', 'admin.talent.*'],
         ['CVs', 'admin.cvs.index', 'doc', 'admin.cvs.*'],
         ['Users', 'admin.users.index', 'users', 'admin.users.*'],
         ['Employers', 'admin.employers.index', 'building', 'admin.employers.*'],
+        ['Settings', 'admin.settings.edit', 'bell', 'admin.settings.*'],
     ];
 @endphp
 
