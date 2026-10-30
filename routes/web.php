@@ -16,6 +16,9 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::view('/offline', 'offline')->name('offline');
 
+//-------------------cron-----------------------
+Route::get('/cron/{token}', \App\Http\Controllers\CronController::class)->name('cron');
+
 Route::get('/jobs', [PublicJobController::class, 'index'])->name('jobs.index');
 Route::get('/jobs/{job}', [PublicJobController::class, 'show'])->whereNumber('job')->name('jobs.show');
 
