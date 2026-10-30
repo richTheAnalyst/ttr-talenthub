@@ -125,6 +125,17 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::patch('/applications/{application}/status', [Admin\ApplicationController::class, 'update'])->whereNumber('application')->name('applications.update');
 
     Route::get('/talent', [Admin\TalentController::class, 'index'])->name('talent.index');
+    Route::get('/approvals', [Admin\ApprovalController::class, 'index'])->name('approvals.index');
+    Route::patch('/approvals/jobs/{job}/approve', [Admin\ApprovalController::class, 'approveJob'])->whereNumber('job')->name('approvals.jobs.approve');
+    Route::patch('/approvals/jobs/{job}/reject', [Admin\ApprovalController::class, 'rejectJob'])->whereNumber('job')->name('approvals.jobs.reject');
+    Route::patch('/approvals/interviews/{interview}/approve', [Admin\ApprovalController::class, 'approveInterview'])->whereNumber('interview')->name('approvals.interviews.approve');
+    Route::patch('/approvals/interviews/{interview}/reject', [Admin\ApprovalController::class, 'rejectInterview'])->whereNumber('interview')->name('approvals.interviews.reject');
+
+    Route::post('/applications/{application}/interviews', [Admin\InterviewController::class, 'store'])->whereNumber('application')->name('interviews.store');
+    Route::patch('/interviews/{interview}/cancel', [Admin\InterviewController::class, 'cancel'])->whereNumber('interview')->name('interviews.cancel');
+
+    Route::get('/placements', [Admin\PlacementController::class, 'index'])->name('placements.index');
+    Route::patch('/placements/{placement}', [Admin\PlacementController::class, 'update'])->whereNumber('placement')->name('placements.update');
     Route::patch('/cvs/{cv}/review', [Admin\CvController::class, 'review'])->whereNumber('cv')->name('cvs.review');
 
     Route::get('/settings', [Admin\SettingsController::class, 'edit'])->name('settings.edit');
