@@ -11,7 +11,7 @@
             <x-field name="title" label="Job title" :value="$job?->title" required placeholder="e.g. Customer Service Officer" />
             <x-textarea name="description" label="Description" :value="$job?->description" rows="8" required hint="Responsibilities, working hours and what success looks like. At least 30 characters." />
             <div class="grid gap-4 sm:grid-cols-2">
-                <x-field name="location" label="Location" :value="$job?->location ?? auth()->user()->employer?->location" placeholder="e.g. Accra" />
+                <x-field name="location" label="Location" :value="$job?->location ?? auth()->user()->employer?->location" placeholder="e.g. Accra" list="locations" autocomplete="off" /><x-location-list />
                 <x-field name="country" label="Country" :value="$job?->country ?? 'Ghana'" />
                 <x-select name="job_type" label="Job type" :options="\App\Enums\JobType::options()" :value="$job?->job_type" required />
                 <x-field name="expires_at" label="Closing date" type="date" :value="$job?->expires_at?->format('Y-m-d')" hint="Optional. The job closes automatically." />
@@ -29,7 +29,15 @@
         </section>
 
         <section class="card space-y-4">
-            <h2 class="text-lg font-semibold">Pay</h2>
+            <h2 class="text-lg font-semibold">How should TTR work with you?</h2>
+            <x-select name="engagement" label="Service" :options="\App\Models\JobPosting::ENGAGEMENTS" :value="$job?->engagement ?? 'recruitment'" required
+                hint="Outsourcing: you pay TTR and TTR employs and pays the worker. Recruitment: TTR finds the person and you employ them for a one-time fee." />
+            <x-field name="client_budget" label="Monthly budget (outsourcing only)" type="number" min="1" :value="$job?->client_budget" inputmode="numeric"
+                hint="What you will pay TTR each month for this worker. TTR keeps {{ rtrim(rtrim(number_format((float) \App\Models\Setting::read('commission_rate', '15'), 2), '0'), '.') }}% and the worker is paid the rest. Leave the pay boxes below empty." />
+        </section>
+
+        <section class="card space-y-4">
+            <h2 class="text-lg font-semibold">Pay (recruitment)</h2>
             <div class="grid gap-4 sm:grid-cols-3">
                 <x-field name="salary_min" label="Monthly minimum" type="number" min="0" :value="$job?->salary_min" inputmode="numeric" />
                 <x-field name="salary_max" label="Monthly maximum" type="number" min="0" :value="$job?->salary_max" inputmode="numeric" />
