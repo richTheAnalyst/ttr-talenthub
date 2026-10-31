@@ -16,9 +16,6 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::view('/offline', 'offline')->name('offline');
 
-//-------------------cron-----------------------
-Route::get('/cron/{token}', \App\Http\Controllers\CronController::class)->name('cron');
-
 Route::get('/jobs', [PublicJobController::class, 'index'])->name('jobs.index');
 Route::get('/jobs/{job}', [PublicJobController::class, 'show'])->whereNumber('job')->name('jobs.show');
 
@@ -56,6 +53,9 @@ Route::middleware(['auth', 'role:candidate,employer,admin'])->group(function () 
     // Authorised per file by CvPolicy
     Route::get('/cv/{cv}', CvDownloadController::class)->whereNumber('cv')->name('cv.download');
 });
+
+// Scheduler ping (cron-job.org calls this every minute with the secret token).
+Route::get('/cron/{token}', \App\Http\Controllers\CronController::class)->name('cron');
 
 // ---- Candidates ---------------------------------------------------------------
 Route::prefix('candidate')->name('candidate.')->middleware(['auth', 'role:candidate'])->group(function () {
@@ -115,6 +115,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::put('/leads/{lead}', [Admin\LeadController::class, 'update'])->whereNumber('lead')->name('leads.update');
 
     Route::get('/hiring', [Admin\HiringRequestController::class, 'index'])->name('hiring.index');
+    Route::get('/jobs/new', [Admin\JobController::class, 'create'])->name('jobs.create');
+    Route::post('/jobs', [Admin\JobController::class, 'store'])->name('jobs.store');
     Route::put('/hiring/{hiringRequest}', [Admin\HiringRequestController::class, 'update'])->whereNumber('hiringRequest')->name('hiring.update');
 
     Route::get('/users', [Admin\UserController::class, 'index'])->name('users.index');
@@ -125,6 +127,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::patch('/applications/{application}/status', [Admin\ApplicationController::class, 'update'])->whereNumber('application')->name('applications.update');
 
     Route::get('/talent', [Admin\TalentController::class, 'index'])->name('talent.index');
+
     Route::get('/approvals', [Admin\ApprovalController::class, 'index'])->name('approvals.index');
     Route::patch('/approvals/jobs/{job}/approve', [Admin\ApprovalController::class, 'approveJob'])->whereNumber('job')->name('approvals.jobs.approve');
     Route::patch('/approvals/jobs/{job}/reject', [Admin\ApprovalController::class, 'rejectJob'])->whereNumber('job')->name('approvals.jobs.reject');

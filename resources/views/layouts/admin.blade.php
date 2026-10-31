@@ -19,6 +19,7 @@
         ['Leads', 'admin.leads.index', 'inbox', 'admin.leads.*'],
         ['Hiring requests', 'admin.hiring.index', 'briefcase', 'admin.hiring.*'],
         ['Approvals', 'admin.approvals.index', 'bell', 'admin.approvals.*'],
+        ['Post a job', 'admin.jobs.create', 'briefcase', 'admin.jobs.*'],
         ['Applications', 'admin.applications.index', 'briefcase', 'admin.applications.*'],
         ['Placements', 'admin.placements.index', 'users', 'admin.placements.*'],
         ['Talent search', 'admin.talent.index', 'search', 'admin.talent.*'],

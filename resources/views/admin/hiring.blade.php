@@ -27,18 +27,29 @@
                             @if ($r->urgency === 'high')<x-badge color="red">Urgent</x-badge>@endif
                         </div>
                     </div>
-                    <dl class="mt-3 grid gap-2 text-sm sm:grid-cols-3">
+                    <dl class="mt-3 grid gap-2 text-sm sm:grid-cols-4">
                         <div><dt class="text-xs text-ink-500">Location</dt><dd>{{ $r->location ?: 'Any' }}</dd></div>
-                        <div><dt class="text-xs text-ink-500">Budget</dt><dd>{{ $r->budget ?: 'Not given' }}</dd></div>
+                        <div><dt class="text-xs text-ink-500">Service</dt><dd>{{ ucfirst($r->engagement ?? 'recruitment') }}</dd></div>
+                        <div><dt class="text-xs text-ink-500">Budget</dt><dd>
+                            @if ($r->isOutsourcing() && $r->client_budget)
+                                {{ number_format($r->client_budget) }}/month · worker gets {{ number_format($r->workerPay($rate)) }} · TTR keeps {{ number_format($r->client_budget - $r->workerPay($rate)) }}
+                            @else
+                                {{ $r->budget ?: 'Not given' }}
+                            @endif
+                        </dd></div>
                         <div><dt class="text-xs text-ink-500">Skills</dt><dd>{{ $r->required_skills ?: 'Not given' }}</dd></div>
                     </dl>
                     @if ($r->description)<p class="mt-2 whitespace-pre-line text-sm text-ink-700">{{ $r->description }}</p>@endif
 
+                    <a href="{{ route('admin.jobs.create', ['request' => $r->id]) }}" class="btn-gold btn-sm mt-3 no-underline">Post as job</a>
                     <button type="button" class="btn-ghost btn-sm mt-3" data-toggle="#manage-{{ $r->id }}" aria-expanded="false" data-allow-resubmit>Manage</button>
                     <form id="manage-{{ $r->id }}" hidden method="POST" action="{{ route('admin.hiring.update', $r) }}" class="mt-3 grid gap-3 border-t border-ink-100 pt-3 sm:grid-cols-2">
                         @csrf @method('PUT')
                         <x-select name="status" label="Status" :options="\App\Models\HiringRequest::STATUSES" :value="$r->status" required />
                         <x-select name="assigned_to" label="Assigned to" :options="$admins->pluck('name', 'id')->all()" :value="$r->assigned_to" placeholder="Unassigned" />
+                        @unless ($r->isOutsourcing())
+                            <x-field name="placement_fee" label="One-time fee (GHS)" type="number" min="0" :value="$r->placement_fee" inputmode="numeric" hint="Fixed fee for this role." />
+                        @endunless
                         <x-textarea name="admin_notes" label="Internal notes" :value="$r->admin_notes" rows="3" class="sm:col-span-2" />
                         <div class="sm:col-span-2"><button class="btn-primary btn-sm" type="submit">Save</button></div>
                     </form>

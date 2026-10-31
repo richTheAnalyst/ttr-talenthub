@@ -20,7 +20,12 @@
     <x-textarea name="description" label="What will they do?" rows="4" />
     <div class="grid gap-4 sm:grid-cols-2">
         <x-select name="urgency" label="How soon?" :options="config('talenthub.urgencies')" value="normal" required />
-        <x-field name="budget" label="Budget (optional)" placeholder="e.g. GHS 3,000 to 4,500 a month" />
+        <x-select name="engagement" label="Service" :options="\App\Models\JobPosting::ENGAGEMENTS" value="recruitment" required
+            hint="Outsourcing: you pay TTR and TTR employs and pays the worker. Recruitment: TTR finds the person and you employ them for a one-time fee." />
+    </div>
+    <div class="grid gap-4 sm:grid-cols-2">
+        <x-field name="client_budget" label="Monthly budget in GHS (outsourcing only)" type="number" min="1" inputmode="numeric" hint="What you will pay TTR each month for this worker." />
+        <x-field name="budget" label="Other budget notes (optional)" placeholder="e.g. up to GHS 4,500 a month" />
     </div>
     <button class="btn-gold btn-block sm:w-auto" type="submit">Send hiring request</button>
 </form>

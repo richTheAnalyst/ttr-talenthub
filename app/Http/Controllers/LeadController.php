@@ -88,7 +88,13 @@ class LeadController extends Controller
             'description' => ['nullable', 'string', 'max:3000'],
             'urgency' => ['required', Rule::in(array_keys(config('talenthub.urgencies')))],
             'budget' => ['nullable', 'string', 'max:120'],
+            'engagement' => ['required', Rule::in(['outsourcing', 'recruitment'])],
+            'client_budget' => ['nullable', 'required_if:engagement,outsourcing', 'integer', 'min:1', 'max:10000000'],
         ]);
+
+        if ($data['engagement'] !== 'outsourcing') {
+            $data['client_budget'] = null;
+        }
 
         $user = $request->user();
 

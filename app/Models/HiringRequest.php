@@ -19,7 +19,7 @@ class HiringRequest extends Model
 
     protected function casts(): array
     {
-        return ['headcount' => 'integer'];
+        return ['headcount' => 'integer', 'client_budget' => 'integer', 'placement_fee' => 'integer'];
     }
 
     public function employer(): BelongsTo
@@ -30,6 +30,17 @@ class HiringRequest extends Model
     public function assignee(): BelongsTo
     {
         return $this->belongsTo(User::class, 'assigned_to');
+    }
+
+    public function isOutsourcing(): bool
+    {
+        return $this->engagement === 'outsourcing';
+    }
+
+    /** Worker pay after TTR's percentage, for outsourcing requests. */
+    public function workerPay(float $rate): int
+    {
+        return (int) floor(($this->client_budget ?? 0) * (100 - $rate) / 100);
     }
 
     public function statusLabel(): string
