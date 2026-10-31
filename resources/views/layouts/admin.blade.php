@@ -22,6 +22,7 @@
         ['Post a job', 'admin.jobs.create', 'briefcase', 'admin.jobs.*'],
         ['Applications', 'admin.applications.index', 'briefcase', 'admin.applications.*'],
         ['Placements', 'admin.placements.index', 'users', 'admin.placements.*'],
+        ['Earnings', 'admin.earnings.index', 'chart', 'admin.earnings.*'],
         ['Talent search', 'admin.talent.index', 'search', 'admin.talent.*'],
         ['CVs', 'admin.cvs.index', 'doc', 'admin.cvs.*'],
         ['Users', 'admin.users.index', 'users', 'admin.users.*'],

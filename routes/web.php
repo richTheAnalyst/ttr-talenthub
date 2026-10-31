@@ -138,6 +138,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::patch('/interviews/{interview}/cancel', [Admin\InterviewController::class, 'cancel'])->whereNumber('interview')->name('interviews.cancel');
 
     Route::get('/placements', [Admin\PlacementController::class, 'index'])->name('placements.index');
+    Route::get('/earnings', [Admin\EarningsController::class, 'index'])->name('earnings.index');
     Route::patch('/placements/{placement}', [Admin\PlacementController::class, 'update'])->whereNumber('placement')->name('placements.update');
     Route::patch('/cvs/{cv}/review', [Admin\CvController::class, 'review'])->whereNumber('cv')->name('cvs.review');
 
