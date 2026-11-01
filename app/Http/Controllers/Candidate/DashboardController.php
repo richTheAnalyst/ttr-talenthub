@@ -8,12 +8,13 @@ use App\Models\Application;
 use App\Models\CandidateProfile;
 use App\Models\JobPosting;
 use App\Services\MatchingService;
+use App\Services\UpcomingInterviews;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
-    public function index(Request $request, MatchingService $matching): View
+    public function index(Request $request, MatchingService $matching, UpcomingInterviews $interviews): View
     {
         $user = $request->user();
         $profile = CandidateProfile::with('skills')->firstOrCreate(['user_id' => $user->id]);
@@ -40,6 +41,7 @@ class DashboardController extends Controller
             'stats' => $stats,
             'notifications' => $user->unreadNotifications()->limit(3)->get(),
             'hasCv' => $user->cvs()->exists(),
+            'upcoming' => $interviews->forCandidate($user),
         ]);
     }
 

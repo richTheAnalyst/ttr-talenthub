@@ -14,16 +14,30 @@ use App\Models\HiringRequest;
 use App\Models\JobPosting;
 use App\Models\Lead;
 use App\Models\User;
+use App\Services\UpcomingInterviews;
+use App\Services\WeeklySummary;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
-    public function index(\App\Services\WeeklySummary $weekly): View
+    public function index(WeeklySummary $weekly, UpcomingInterviews $interviews): View
+    {
+        // The numbers are cached for 3 minutes in a file, so most page loads run no database queries.
+        $data = Cache::store('file')->remember('admin-dashboard', 180, fn () => $this->data($weekly));
+
+        // Interviews are never cached: they change by the hour.
+        $data['upcoming'] = $interviews->forAdmin();
+
+        return view('admin.dashboard', $data);
+    }
+
+    private function data(WeeklySummary $weekly): array
     {
         $leadsByStage = Lead::selectRaw('stage, count(*) as total')->groupBy('stage')->pluck('total', 'stage');
         $leadsByType = Lead::selectRaw('type, count(*) as total')->groupBy('type')->pluck('total', 'type');
         $appsByStatus = Application::selectRaw('status, count(*) as total')->groupBy('status')->pluck('total', 'status');
-           
+
         $stageRows = [];
         foreach (LeadStage::cases() as $stage) {
             $stageRows[] = ['label' => $stage->label(), 'badge' => $stage->badge(), 'total' => (int) ($leadsByStage[$stage->value] ?? 0), 'value' => $stage->value];
@@ -39,7 +53,7 @@ class DashboardController extends Controller
             $typeRows[] = ['label' => $label, 'total' => (int) ($leadsByType[$key] ?? 0)];
         }
 
-        return view('admin.dashboard', [
+        return [
             'stats' => [
                 'candidates' => User::where('role', Role::Candidate->value)->count(),
                 'employers' => Employer::count(),
@@ -50,11 +64,11 @@ class DashboardController extends Controller
                 'new_requests' => HiringRequest::where('status', 'new')->count(),
                 'avg_completeness' => (int) round((float) CandidateProfile::avg('completeness')),
             ],
-             'week' => $weekly->build(),
+            'week' => $weekly->build(),
             'stageRows' => $stageRows,
             'statusRows' => $statusRows,
             'typeRows' => $typeRows,
             'hotLeads' => Lead::where('stage', LeadStage::New->value)->orderByDesc('score')->limit(5)->get(),
-        ]);
+        ];
     }
 }

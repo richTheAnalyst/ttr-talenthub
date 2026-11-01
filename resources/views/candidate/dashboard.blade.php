@@ -27,6 +27,8 @@
         <x-stat label="Active alerts" :value="$stats['alerts']" :href="route('candidate.alerts.index')" />
     </div>
 
+    @include('partials.upcoming-interviews')
+
     @if ($notifications->isNotEmpty())
         <section class="mb-6" aria-labelledby="updates">
             <h2 id="updates" class="mb-2 text-lg font-bold">New for you</h2>

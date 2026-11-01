@@ -6,6 +6,7 @@
     </x-page-header>
 
     @include('partials.recent-updates')
+
     @unless ($employer->isVerified())
         <div class="mb-5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
             Your company is not verified yet. Jobs can still be posted. <a href="{{ route('employer.company.edit') }}" class="font-semibold">Complete your company details</a> to speed up verification.
@@ -18,6 +19,8 @@
         <x-stat label="To review" :value="$stats['to_review']" tone="gold" />
         <x-stat label="Interviews" :value="$stats['interviews']" />
     </div>
+
+    @include('partials.upcoming-interviews')
 
     <div class="grid gap-6 lg:grid-cols-2">
         <section aria-labelledby="recent">

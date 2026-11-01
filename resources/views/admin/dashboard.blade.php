@@ -14,7 +14,10 @@
         <x-stat label="Avg. profile complete" :value="$stats['avg_completeness'].'%'" />
     </div>
 
-        @include('admin._weekly')
+    @include('partials.upcoming-interviews')
+
+    @include('admin._weekly')
+
     @php
         $bars = function (array $rows) {
             $max = max(1, max(array_column($rows, 'total') ?: [0]));
