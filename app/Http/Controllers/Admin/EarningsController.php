@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Placement;
+use App\Models\PlacementPayment;
 use Carbon\Carbon;
 use Illuminate\View\View;
 
@@ -15,6 +16,8 @@ class EarningsController extends Controller
         $placements = Placement::with('employer:id,company_name')->get();
         $now = now();
         $months = collect(range(5, 0))->map(fn ($i) => $now->copy()->startOfMonth()->subMonths($i));
+
+        $cash = PlacementPayment::with('placement:id,currency')->get()->groupBy(fn ($pay) => $pay->placement?->currency ?? 'GHS');
 
         $report = [];
 
@@ -58,6 +61,8 @@ class EarningsController extends Controller
                 'this_month' => $thisMonth['outsourcing'] + $thisMonth['recruitment'],
                 'fees_paid' => $recruitment->whereNotNull('fee_paid_at')->sum('one_time_fee'),
                 'fees_due' => $recruitment->whereNull('fee_paid_at')->sum('one_time_fee'),
+                'received_month' => ($cash[$currency] ?? collect())->filter(fn ($pay) => $pay->client_paid_at?->isSameMonth($now))->sum(fn ($pay) => $pay->client_amount ?? 0),
+                'owed_workers' => ($cash[$currency] ?? collect())->filter(fn ($pay) => $pay->client_paid_at && ! $pay->worker_paid_at)->sum(fn ($pay) => $pay->worker_amount ?? ($pay->placement?->monthly_salary ?? 0)),
                 'series' => $series,
                 'max' => max(1, collect($series)->max(fn ($s) => $s['outsourcing'] + $s['recruitment'])),
                 'employers' => $employers,

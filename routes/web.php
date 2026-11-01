@@ -139,6 +139,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
 
     Route::get('/placements', [Admin\PlacementController::class, 'index'])->name('placements.index');
     Route::get('/earnings', [Admin\EarningsController::class, 'index'])->name('earnings.index');
+    Route::get('/payments', [Admin\PaymentController::class, 'index'])->name('payments.index');
+    Route::patch('/payments/{placement}', [Admin\PaymentController::class, 'update'])->whereNumber('placement')->name('payments.update');
     Route::patch('/placements/{placement}', [Admin\PlacementController::class, 'update'])->whereNumber('placement')->name('placements.update');
     Route::patch('/cvs/{cv}/review', [Admin\CvController::class, 'review'])->whereNumber('cv')->name('cvs.review');
 

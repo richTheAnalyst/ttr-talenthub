@@ -34,6 +34,19 @@
                 </div>
             </div>
 
+            <div class="mt-3 grid gap-3 sm:grid-cols-2">
+                <div class="card">
+                    <p class="text-sm text-ink-500">Cash received from employers this month</p>
+                    <p class="text-2xl font-bold text-ink-900">{{ number_format($r['received_month']) }}</p>
+                    <p class="text-xs text-ink-500"><a href="{{ route('admin.payments.index') }}">Record payments</a></p>
+                </div>
+                <div class="card">
+                    <p class="text-sm text-ink-500">Employer has paid, worker not yet paid</p>
+                    <p class="text-2xl font-bold {{ $r['owed_workers'] > 0 ? 'text-amber-700' : 'text-ink-900' }}">{{ number_format($r['owed_workers']) }}</p>
+                    <p class="text-xs text-ink-500">Owed to workers</p>
+                </div>
+            </div>
+
             <div class="card mt-3">
                 <h3 class="text-base font-semibold">Last 6 months</h3>
                 <div class="mt-4 flex h-40 items-end gap-2" role="img" aria-label="Earnings by month in {{ $currency }}">
